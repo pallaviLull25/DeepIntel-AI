@@ -14,10 +14,21 @@ export interface CompetitorData {
   weaknesses: string[];
 }
 
+export interface ChartDatum {
+  name: string;
+  featureScore: number;
+  pricingScore: number;
+}
+
 export interface ResearchReport {
   summary: string;
   competitors: CompetitorData[];
   marketTrends: string[];
   recommendations: string[];
-  chartData: any[];
+  chartData: ChartDatum[];
+}
+
+export interface ResearchApiResponse {
+  report: ResearchReport;
+  steps: ResearchStep[];
 }
