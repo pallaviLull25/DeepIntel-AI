@@ -1,0 +1,5 @@
+{
+  "name": "DeepIntel Research Agent",
+  "description": "An AI-powered competitive intelligence agent that performs recursive research, scrapes competitor data, and generates deep market analysis reports.",
+  "requestFramePermissions": []
+}
