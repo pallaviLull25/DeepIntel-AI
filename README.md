@@ -1,6 +1,6 @@
-# DeepIntel
+# IntelAtlas
 
-DeepIntel is a competitive research agent with a React dashboard and a FastAPI backend. Enter a market or company topic, and the app generates a structured report with a summary, competitor breakdown, market trends, recommendations, chart data, grounded evidence, and coverage gaps.
+IntelAtlas is a competitive research agent with a React dashboard and a FastAPI backend. Enter a market or company topic, and the app generates a structured report with a summary, competitor breakdown, market trends, recommendations, chart data, grounded evidence, and coverage gaps.
 
 ## Run
 

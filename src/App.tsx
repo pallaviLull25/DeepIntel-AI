@@ -11,7 +11,6 @@ import {
   Target,
   Zap,
   ChevronRight,
-  Compass,
   BookOpen,
   PieChart,
   ArrowRight
@@ -24,15 +23,48 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Legend,
   Cell
 } from 'recharts';
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
+import IntelAtlasLogo from './components/IntelAtlasLogo';
 import { ResearchAgent } from './services/researchAgent';
 import { EvaluationSummary, ResearchPlan, ResearchReport, ResearchStep, ToolTrace } from './types';
+import intelAtlas from './assets/intel-atlas.svg';
 
 const COLORS = ['#111827', '#374151', '#6b7280', '#9ca3af'];
+const HERO_PILLS = ['Recursive research loop', 'Grounded evidence ledger', 'Live tool traces'];
+const HERO_METRICS = [
+  {
+    label: 'Planner + Critic',
+    value: '2-pass',
+    detail: 'Breaks down the brief, identifies gaps, and loops back before final synthesis.',
+  },
+  {
+    label: 'Fetch + Rank',
+    value: 'Hybrid',
+    detail: 'Blends search results, fetched pages, and ranked passages into one evidence layer.',
+  },
+  {
+    label: 'Confidence + Eval',
+    value: 'Scored',
+    detail: 'Ships every run with confidence, coverage gaps, and an effectiveness summary.',
+  },
+];
+const SIDE_SIGNALS = [
+  {
+    title: 'Situation Room',
+    description: 'Built to feel like an analyst cockpit: ambient map, live process stream, and source-backed output.',
+  },
+  {
+    title: 'Decision Velocity',
+    description: 'Structured for quick operator scans instead of generic chatbot prose.',
+  },
+  {
+    title: 'Research Memory',
+    description: 'Local corpus storage keeps each run closer to an actual intelligence workflow.',
+  },
+];
 
 export default function App() {
   const [topic, setTopic] = useState('');
@@ -81,15 +113,31 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-paper text-ink font-sans selection:bg-ink selection:text-white">
+    <div className="relative min-h-screen overflow-hidden bg-paper text-ink font-sans selection:bg-ink selection:text-white">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_14%_10%,rgba(15,118,110,0.12),transparent_28%),radial-gradient(circle_at_86%_14%,rgba(213,138,46,0.14),transparent_26%),linear-gradient(180deg,rgba(255,255,255,0.45),rgba(247,243,235,0.8))]" />
+        <div className="mesh-overlay absolute inset-0 opacity-70" />
+        <motion.div
+          initial={{ opacity: 0, scale: 1.04 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.1, ease: 'easeOut' }}
+          className="absolute right-[-14rem] top-[-7rem] w-[42rem] opacity-70 mix-blend-multiply lg:w-[62rem]"
+        >
+          <img src={intelAtlas} alt="" className="w-full object-contain" />
+        </motion.div>
+        <div className="absolute left-[-7rem] top-[18rem] h-[18rem] w-[18rem] rounded-full bg-[radial-gradient(circle,rgba(15,118,110,0.22),transparent_72%)] blur-3xl" />
+        <div className="absolute right-[12%] top-[42%] h-[17rem] w-[17rem] rounded-full bg-[radial-gradient(circle,rgba(213,138,46,0.2),transparent_70%)] blur-3xl" />
+      </div>
+
       {/* Navigation */}
-      <nav className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="sticky top-0 z-50 border-b border-white/40 bg-white/45 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-ink rounded-lg flex items-center justify-center text-white">
-              <Compass size={18} />
+            <IntelAtlasLogo size={36} />
+            <div className="space-y-0.5">
+              <h1 className="text-sm font-bold tracking-tight">INTELATLAS</h1>
+              <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-muted/80">Grounded Competitive Intelligence</p>
             </div>
-            <h1 className="text-sm font-bold tracking-tight">DEEPINTEL</h1>
           </div>
           
           <div className="flex items-center gap-6">
@@ -101,10 +149,72 @@ export default function App() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto p-6 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="relative max-w-7xl mx-auto px-6 py-8 lg:px-12 lg:py-10 space-y-8">
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <motion.section
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+            className="panel-dark relative overflow-hidden rounded-[2rem] p-8 lg:col-span-7 lg:p-10 text-white"
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(15,118,110,0.22),transparent_34%),linear-gradient(140deg,rgba(255,255,255,0.03),transparent_55%)]" />
+            <div className="absolute right-[-10rem] top-[-9rem] w-[32rem] opacity-25 mix-blend-screen lg:w-[40rem]">
+              <img src={intelAtlas} alt="" className="w-full object-contain" />
+            </div>
+            <div className="relative space-y-6">
+              <div className="flex flex-wrap gap-2">
+                {HERO_PILLS.map((item) => (
+                  <span
+                    key={item}
+                    className="hero-chip rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-white/78"
+                  >
+                    {item}
+                  </span>
+                ))}
+              </div>
+
+              <div className="max-w-2xl space-y-4">
+                <p className="text-[11px] font-bold uppercase tracking-[0.28em] text-white/55">Competitive intelligence engine</p>
+                <h2 className="text-4xl font-semibold leading-[1.02] tracking-tight lg:text-[3.55rem]">
+                  Turn a vague market prompt into an evidence-backed brief.
+                </h2>
+                <p className="max-w-xl text-sm leading-relaxed text-white/72 lg:text-[15px]">
+                  IntelAtlas plans the investigation, calls live tools, fetches source pages, ranks evidence, and returns a report that reads like analyst work instead of generic model output.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                {HERO_METRICS.map((item) => (
+                  <div key={item.label} className="rounded-[1.5rem] border border-white/12 bg-white/6 p-4 backdrop-blur-sm">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/48">{item.label}</p>
+                    <p className="mt-3 text-2xl font-semibold tracking-tight">{item.value}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-white/62">{item.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:col-span-5 lg:grid-cols-1">
+            {SIDE_SIGNALS.map((item, index) => (
+              <motion.article
+                key={item.title}
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.12 + (index * 0.08), ease: 'easeOut' }}
+                className="metric-tile rounded-[1.75rem] p-5"
+              >
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted">{item.title}</p>
+                <p className="mt-3 text-sm font-semibold text-ink">{item.description}</p>
+              </motion.article>
+            ))}
+          </div>
+        </section>
+
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left: Input & Log */}
         <div className="lg:col-span-4 space-y-8">
-          <section className="bg-white rounded-2xl p-6 soft-border card-shadow space-y-6">
+          <section className="panel-surface rounded-[1.75rem] p-6 space-y-6">
             <div className="space-y-1">
               <h2 className="text-lg font-bold">Research Terminal</h2>
               <p className="text-xs text-muted">Enter a market or competitor to begin.</p>
@@ -117,7 +227,7 @@ export default function App() {
                   value={topic}
                   onChange={(e) => setTopic(e.target.value)}
                   placeholder="e.g. 'Cloud Storage Market'"
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-ink/5 focus:border-ink transition-all"
+                  className="w-full rounded-xl border border-white/60 bg-white/70 p-3 pl-10 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] focus:outline-none focus:ring-2 focus:ring-ink/8 focus:border-ink/30 transition-all"
                   disabled={isResearching}
                 />
                 <Search className="absolute left-3 top-3 text-muted" size={16} />
@@ -125,7 +235,7 @@ export default function App() {
               <button
                 type="submit"
                 disabled={isResearching || !topic.trim()}
-                className="w-full bg-ink text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-800 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full rounded-xl bg-[linear-gradient(145deg,#111827,#1f4a57)] py-3 text-xs font-bold uppercase tracking-widest text-white shadow-[0_18px_40px_rgba(17,24,39,0.22)] transition-all hover:-translate-y-px hover:shadow-[0_22px_48px_rgba(17,24,39,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isResearching ? (
                   <>
@@ -143,7 +253,7 @@ export default function App() {
           </section>
 
           {/* Activity Log */}
-          <section className="bg-white rounded-2xl p-6 soft-border card-shadow space-y-4">
+          <section className="panel-surface rounded-[1.75rem] p-6 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted">Process Log</h3>
               <Activity size={14} className="text-muted" />
@@ -164,20 +274,20 @@ export default function App() {
                   initial={{ opacity: 0, x: -5 }}
                   animate={{ opacity: 1, x: 0 }}
                   key={step.id} 
-                  className="flex gap-2 text-[10px] leading-relaxed border-l-2 border-gray-100 pl-3"
+                  className="flex gap-2 text-[10px] leading-relaxed border-l-2 border-teal-900/10 pl-3"
                 >
                   <p><span className="font-bold text-ink uppercase opacity-40 mr-1">{step.type}</span> {step.message}</p>
                 </motion.div>
               ))}
               {isResearching && (
-                <div className="flex gap-2 text-[10px] animate-pulse pl-3 border-l-2 border-gray-100">
+                <div className="flex gap-2 text-[10px] animate-pulse pl-3 border-l-2 border-teal-900/10">
                   <p className="italic text-muted">Awaiting node response...</p>
                 </div>
               )}
             </div>
           </section>
 
-          <section className="bg-white rounded-2xl p-6 soft-border card-shadow space-y-4">
+          <section className="panel-surface rounded-[1.75rem] p-6 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted">Research Plan</h3>
               <Target size={14} className="text-muted" />
@@ -189,7 +299,7 @@ export default function App() {
 
             {plan && (
               <div className="space-y-4">
-                <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+                <div className="rounded-2xl border border-white/70 bg-white/60 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-2">Objective</p>
                   <p className="text-xs leading-relaxed text-ink/70">{plan.objective}</p>
                 </div>
@@ -228,9 +338,12 @@ export default function App() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-white rounded-3xl p-12 flex flex-col items-center justify-center text-center space-y-6 soft-border card-shadow min-h-[500px]"
+                className="panel-surface relative overflow-hidden rounded-[2rem] p-12 flex flex-col items-center justify-center text-center space-y-6 min-h-[500px]"
               >
-                <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center">
+                <div className="absolute right-[-7rem] top-[-5rem] w-[22rem] opacity-20 mix-blend-multiply">
+                  <img src={intelAtlas} alt="" className="w-full object-contain" />
+                </div>
+                <div className="w-16 h-16 rounded-2xl bg-[linear-gradient(145deg,#eef5f4,#ffffff)] shadow-[0_20px_40px_rgba(15,23,42,0.08)] flex items-center justify-center">
                   <Target size={24} className="text-gray-300" />
                 </div>
                 <div className="max-w-xs space-y-2">
@@ -246,15 +359,18 @@ export default function App() {
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-white rounded-3xl p-12 flex flex-col items-center justify-center text-center space-y-8 soft-border card-shadow min-h-[500px]"
+                className="panel-dark relative overflow-hidden rounded-[2rem] p-12 flex flex-col items-center justify-center text-center space-y-8 min-h-[500px] text-white"
               >
+                <div className="absolute right-[-8rem] top-[-5rem] w-[24rem] opacity-20 mix-blend-screen">
+                  <img src={intelAtlas} alt="" className="w-full object-contain" />
+                </div>
                 <div className="relative">
-                  <div className="w-16 h-16 border-2 border-gray-100 rounded-2xl"></div>
-                  <div className="absolute inset-0 w-16 h-16 border-2 border-ink border-t-transparent rounded-2xl animate-spin"></div>
+                  <div className="w-16 h-16 border-2 border-white/15 rounded-2xl"></div>
+                  <div className="absolute inset-0 w-16 h-16 border-2 border-white border-t-transparent rounded-2xl animate-spin"></div>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold">Generating Intelligence</h3>
-                  <p className="text-xs text-muted max-w-xs mx-auto">
+                  <p className="text-xs text-white/65 max-w-xs mx-auto">
                     Traversing global market data and synthesizing competitive insights.
                   </p>
                 </div>
@@ -268,7 +384,7 @@ export default function App() {
                 className="space-y-8"
               >
                 {/* Summary */}
-                <section className="bg-white rounded-3xl p-8 lg:p-12 soft-border card-shadow">
+                <section className="panel-surface rounded-[2rem] p-8 lg:p-12">
                   <div className="flex items-center gap-2 mb-6">
                     <FileText size={16} className="text-muted" />
                     <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Executive Summary</h2>
@@ -279,7 +395,7 @@ export default function App() {
                 </section>
 
                 {/* Matrix */}
-                <section className="bg-white rounded-3xl p-8 lg:p-12 soft-border card-shadow">
+                <section className="panel-surface rounded-[2rem] p-8 lg:p-12">
                   <div className="flex items-center gap-2 mb-8">
                     <PieChart size={16} className="text-muted" />
                     <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Market Comparison</h2>
@@ -317,7 +433,7 @@ export default function App() {
                 {/* Competitors */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {report.competitors.map((comp, idx) => (
-                    <section key={idx} className="bg-white rounded-2xl p-6 soft-border card-shadow">
+                    <section key={idx} className="panel-surface rounded-[1.75rem] p-6">
                       <div className="flex justify-between items-start mb-6">
                         <h3 className="text-base font-bold">{comp.name}</h3>
                         <div className="flex flex-col items-end gap-2">
@@ -374,7 +490,7 @@ export default function App() {
 
                 {/* Trends & Advice */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                  <section className="panel-surface rounded-[2rem] p-8">
                     <div className="flex items-center gap-2 mb-6">
                       <TrendingUp size={16} className="text-muted" />
                       <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Market Trajectory</h2>
@@ -389,7 +505,7 @@ export default function App() {
                     </ul>
                   </section>
 
-                  <section className="bg-ink text-white rounded-3xl p-8 shadow-xl">
+                  <section className="panel-dark rounded-[2rem] p-8 text-white">
                     <div className="flex items-center gap-2 mb-6">
                       <Zap size={16} className="text-gray-400" />
                       <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Strategic Directives</h2>
@@ -406,7 +522,7 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                  <section className="panel-surface rounded-[2rem] p-8">
                     <div className="flex items-center gap-2 mb-6">
                       <BarChart3 size={16} className="text-muted" />
                       <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Confidence Signals</h2>
@@ -451,7 +567,7 @@ export default function App() {
                     </div>
                   </section>
 
-                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                  <section className="panel-surface rounded-[2rem] p-8">
                     <div className="flex items-center gap-2 mb-6">
                       <BookOpen size={16} className="text-muted" />
                       <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Evidence Ledger</h2>
@@ -513,7 +629,7 @@ export default function App() {
                 </div>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                  <section className="panel-surface rounded-[2rem] p-8">
                     <div className="flex items-center gap-2 mb-6">
                       <Activity size={16} className="text-muted" />
                       <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Run Evaluation</h2>
@@ -554,7 +670,7 @@ export default function App() {
                     )}
                   </section>
 
-                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                  <section className="panel-surface rounded-[2rem] p-8">
                     <div className="flex items-center gap-2 mb-6">
                       <Activity size={16} className="text-muted" />
                       <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Tool Trace</h2>
@@ -587,13 +703,14 @@ export default function App() {
             )}
           </AnimatePresence>
         </div>
+        </section>
       </main>
 
-      <footer className="border-t border-gray-100 p-8 mt-12">
+      <footer className="relative border-t border-white/35 p-8 mt-12 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] font-bold uppercase tracking-widest text-muted">
           <div className="flex items-center gap-2">
-            <Compass size={14} />
-            <span>DEEPINTEL ENGINE v1.2</span>
+            <IntelAtlasLogo size={22} className="rounded-[0.7rem]" />
+            <span>INTELATLAS ENGINE v1.2</span>
           </div>
           <div className="flex gap-8">
             <a href="#" className="hover:text-ink transition-colors">Methodology</a>

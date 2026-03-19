@@ -14,7 +14,7 @@ OUTPUT_DIR = Path(__file__).resolve().parent.parent.parent / "data" / "evals"
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run DeepIntel evaluation cases.")
+    parser = argparse.ArgumentParser(description="Run IntelAtlas evaluation cases.")
     parser.add_argument("--dataset", default=str(DATASET_PATH), help="Path to a JSONL evaluation dataset.")
     parser.add_argument("--limit", type=int, default=0, help="Optional limit on the number of cases to run.")
     parser.add_argument("--model", default=None, help="Optional GEMINI_MODEL override for the eval run.")

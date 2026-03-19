@@ -13,7 +13,7 @@ from backend.models import Citation, ToolTrace
 
 MAX_FETCH_BYTES = 350_000
 DEFAULT_TIMEOUT = 8
-USER_AGENT = "DeepIntelBot/0.1 (+https://example.local)"
+USER_AGENT = "IntelAtlasBot/0.1 (+https://example.local)"
 
 
 @dataclass
