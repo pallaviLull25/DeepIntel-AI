@@ -1,0 +1,44 @@
+flowchart TD
+  Browser["Browser"]
+
+  subgraph Dev["Development run (npm run dev)"]
+    Vite["Vite dev server (:3000)"]
+    UI["React 19 + TypeScript UI<br/>src/App.tsx"]
+    Agent["ResearchAgent<br/>src/services/researchAgent.ts"]
+    Browser --> Vite --> UI --> Agent
+  end
+
+  API["FastAPI + Uvicorn<br/>backend/main.py"]
+  Models["Pydantic request/response models<br/>backend/models.py"]
+  Service["Research orchestrator<br/>backend/research_service.py"]
+  Planner["Planner + Critic + Synthesizer<br/>backend/agents/"]
+  Retrieval["Local corpus, chunking, hybrid retrieval<br/>backend/retrieval/"]
+  Fetch["Page fetch + HTML text extraction<br/>backend/tools/fetch.py"]
+  Eval["Dataset + eval runner<br/>backend/evals/"]
+  Env[".env.local<br/>GEMINI_API_KEY"]
+  Gemini["Google Gemini via google-genai"]
+  Search["Google Search tool"]
+  Corpus["Persisted run artifacts<br/>data/corpus/"]
+  Render["Rendered output:<br/>summary, charts, evidence, gaps, activity log"]
+  Dist["Built SPA assets<br/>dist/"]
+
+  Agent -->|POST /api/research| API
+  Vite -. proxies /api .-> API
+  API --> Models
+  API --> Service
+  Env --> API
+  Service --> Planner
+  Planner --> Gemini
+  Gemini --> Search
+  Service --> Fetch
+  Fetch --> Retrieval
+  Service --> Retrieval
+  Retrieval --> Corpus
+  Retrieval --> Planner
+  Eval -. runs orchestrator offline .-> Service
+  Service -->|structured JSON report + steps| API
+  API --> UI
+  UI --> Render
+
+  API -. when NODE_ENV=production .-> Dist
+  Dist -.served by FastAPI .-> Browser

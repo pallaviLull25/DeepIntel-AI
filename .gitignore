@@ -9,3 +9,6 @@ coverage/
 !.env.example
 __pycache__/
 .pytest_cache/
+data/corpus/
+data/evals/
+tmp-*.json

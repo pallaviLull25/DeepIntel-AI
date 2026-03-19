@@ -30,7 +30,7 @@ import {
 import Markdown from 'react-markdown';
 import { motion, AnimatePresence } from 'motion/react';
 import { ResearchAgent } from './services/researchAgent';
-import { ResearchStep, ResearchReport } from './types';
+import { EvaluationSummary, ResearchPlan, ResearchReport, ResearchStep, ToolTrace } from './types';
 
 const COLORS = ['#111827', '#374151', '#6b7280', '#9ca3af'];
 
@@ -39,6 +39,9 @@ export default function App() {
   const [isResearching, setIsResearching] = useState(false);
   const [steps, setSteps] = useState<ResearchStep[]>([]);
   const [report, setReport] = useState<ResearchReport | null>(null);
+  const [plan, setPlan] = useState<ResearchPlan | null>(null);
+  const [toolTraces, setToolTraces] = useState<ToolTrace[]>([]);
+  const [evaluation, setEvaluation] = useState<EvaluationSummary | null>(null);
   const [error, setError] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -55,6 +58,9 @@ export default function App() {
     setIsResearching(true);
     setSteps([]);
     setReport(null);
+    setPlan(null);
+    setToolTraces([]);
+    setEvaluation(null);
     setError(null);
 
     const agent = new ResearchAgent((step) => {
@@ -63,7 +69,10 @@ export default function App() {
 
     try {
       const result = await agent.performResearch(topic);
-      setReport(result);
+      setReport(result.report);
+      setPlan(result.plan || null);
+      setToolTraces(result.toolTraces || []);
+      setEvaluation(result.evaluation || null);
     } catch (err: any) {
       setError(err.message || "An error occurred during research.");
     } finally {
@@ -166,6 +175,38 @@ export default function App() {
                 </div>
               )}
             </div>
+          </section>
+
+          <section className="bg-white rounded-2xl p-6 soft-border card-shadow space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted">Research Plan</h3>
+              <Target size={14} className="text-muted" />
+            </div>
+
+            {!plan && (
+              <p className="text-xs text-muted">The planner will populate objective, sub-questions, and success criteria after a run.</p>
+            )}
+
+            {plan && (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted mb-2">Objective</p>
+                  <p className="text-xs leading-relaxed text-ink/70">{plan.objective}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Sub-Questions</p>
+                  <ul className="space-y-2">
+                    {plan.subQuestions.map((item) => (
+                      <li key={item} className="text-xs leading-relaxed text-ink/70 flex gap-2">
+                        <ChevronRight size={12} className="mt-0.5 shrink-0 text-gray-400" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
           </section>
         </div>
 
@@ -279,9 +320,16 @@ export default function App() {
                     <section key={idx} className="bg-white rounded-2xl p-6 soft-border card-shadow">
                       <div className="flex justify-between items-start mb-6">
                         <h3 className="text-base font-bold">{comp.name}</h3>
-                        <span className="text-[9px] font-bold bg-gray-50 text-muted px-2 py-1 rounded-md uppercase tracking-wider border border-gray-100">
-                          {comp.pricing || 'Standard'}
-                        </span>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className="text-[9px] font-bold bg-gray-50 text-muted px-2 py-1 rounded-md uppercase tracking-wider border border-gray-100">
+                            {comp.pricing || 'Standard'}
+                          </span>
+                          {typeof comp.confidence === 'number' && (
+                            <span className="text-[9px] font-bold bg-emerald-50 text-emerald-700 px-2 py-1 rounded-md uppercase tracking-wider border border-emerald-100">
+                              {comp.confidence}% confidence
+                            </span>
+                          )}
+                        </div>
                       </div>
                       
                       <div className="space-y-6">
@@ -354,6 +402,185 @@ export default function App() {
                         </li>
                       ))}
                     </ul>
+                  </section>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                    <div className="flex items-center gap-2 mb-6">
+                      <BarChart3 size={16} className="text-muted" />
+                      <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Confidence Signals</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {report.confidence.length === 0 && (
+                        <p className="text-xs text-muted">No section confidence scores were returned.</p>
+                      )}
+
+                      {report.confidence.map((item) => (
+                        <div key={item.name} className="space-y-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <h3 className="text-[10px] font-bold uppercase tracking-wider text-ink">{item.name}</h3>
+                            <span className="text-[10px] font-bold text-muted">{item.score}%</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-gray-100 overflow-hidden">
+                            <div
+                              className="h-full bg-ink rounded-full transition-all"
+                              style={{ width: `${Math.max(0, Math.min(item.score, 100))}%` }}
+                            />
+                          </div>
+                          <p className="text-xs leading-relaxed text-ink/60">{item.rationale}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-8 pt-6 border-t border-gray-100 space-y-3">
+                      <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted">Open Coverage Gaps</h3>
+                      {report.gaps.length === 0 && (
+                        <p className="text-xs text-emerald-700">No unresolved gaps were carried into the report.</p>
+                      )}
+                      {report.gaps.map((gap) => (
+                        <div key={`${gap.topic}-${gap.reason}`} className="rounded-2xl border border-amber-100 bg-amber-50/70 p-4 space-y-1">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-xs font-bold text-amber-900">{gap.topic}</p>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-amber-700">{gap.severity}</span>
+                          </div>
+                          <p className="text-xs leading-relaxed text-amber-900/80">{gap.reason}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                    <div className="flex items-center gap-2 mb-6">
+                      <BookOpen size={16} className="text-muted" />
+                      <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Evidence Ledger</h2>
+                    </div>
+
+                    <div className="space-y-4">
+                      {report.evidence.length === 0 && (
+                        <p className="text-xs text-muted">No grounded evidence passages were returned.</p>
+                      )}
+
+                      {report.evidence.map((item) => (
+                        <article key={item.id} className="rounded-2xl border border-gray-100 p-4 space-y-3">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">{item.query || item.sourceType}</p>
+                              <p className="text-xs leading-relaxed text-ink/70">{item.summary}</p>
+                            </div>
+                            {typeof item.retrievalScore === 'number' && (
+                              <div className="shrink-0 flex flex-col items-end gap-1">
+                                <span className="rounded-full bg-gray-50 px-2 py-1 text-[9px] font-bold text-muted border border-gray-100">
+                                  score {item.retrievalScore.toFixed(2)}
+                                </span>
+                                {typeof item.lexicalScore === 'number' && typeof item.semanticScore === 'number' && (
+                                  <span className="text-[9px] text-muted">
+                                    lex {item.lexicalScore.toFixed(2)} / sem {item.semanticScore.toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {item.excerpt && (
+                            <blockquote className="border-l-2 border-gray-200 pl-3 text-xs leading-relaxed text-ink/60">
+                              {item.excerpt}
+                            </blockquote>
+                          )}
+
+                          <div className="space-y-2">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Sources</p>
+                            <div className="space-y-2">
+                              {item.citations.map((citation) => (
+                                <a
+                                  key={citation.url}
+                                  href={citation.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="block rounded-xl border border-gray-100 px-3 py-2 hover:border-gray-200 transition-colors"
+                                >
+                                  <p className="text-xs font-medium text-ink/80">{citation.title}</p>
+                                  <p className="text-[10px] text-muted break-all">{citation.url}</p>
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Activity size={16} className="text-muted" />
+                      <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Run Evaluation</h2>
+                    </div>
+
+                    {!evaluation && (
+                      <p className="text-xs text-muted">No evaluation summary was returned for this run.</p>
+                    )}
+
+                    {evaluation && (
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-2 gap-3">
+                          {[
+                            ['Groundedness', evaluation.groundedness],
+                            ['Completeness', evaluation.completeness],
+                            ['Citation Coverage', evaluation.citationCoverage],
+                            ['Reflection Quality', evaluation.reflectionQuality],
+                          ].map(([label, score]) => (
+                            <div key={label} className="rounded-2xl border border-gray-100 bg-gray-50/70 p-4 space-y-2">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">{label}</p>
+                              <p className="text-lg font-bold text-ink">{score}%</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-muted">Notes</p>
+                          <ul className="space-y-2">
+                            {evaluation.notes.map((note) => (
+                              <li key={note} className="text-xs leading-relaxed text-ink/70 flex gap-2">
+                                <ArrowRight size={12} className="mt-0.5 shrink-0 text-gray-400" />
+                                <span>{note}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </section>
+
+                  <section className="bg-white rounded-3xl p-8 soft-border card-shadow">
+                    <div className="flex items-center gap-2 mb-6">
+                      <Activity size={16} className="text-muted" />
+                      <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted">Tool Trace</h2>
+                    </div>
+
+                    {toolTraces.length === 0 && (
+                      <p className="text-xs text-muted">No tool traces were recorded for this run.</p>
+                    )}
+
+                    <div className="space-y-3">
+                      {toolTraces.map((trace) => (
+                        <article key={trace.id} className="rounded-2xl border border-gray-100 p-4 space-y-2">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted">{trace.toolName}</p>
+                              <p className="text-xs font-medium text-ink/80">{trace.whyUsed}</p>
+                            </div>
+                            <span className={`rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wider border ${trace.success ? 'border-emerald-100 bg-emerald-50 text-emerald-700' : 'border-amber-100 bg-amber-50 text-amber-700'}`}>
+                              {trace.latencyMs} ms
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-muted break-words">{trace.inputSummary}</p>
+                          <p className="text-xs leading-relaxed text-ink/65">{trace.outputSummary}</p>
+                        </article>
+                      ))}
+                    </div>
                   </section>
                 </div>
               </motion.div>

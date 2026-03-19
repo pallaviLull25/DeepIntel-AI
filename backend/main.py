@@ -76,7 +76,7 @@ async def research(request: ResearchRequest) -> Union[ResearchApiResponse, JSONR
         return JSONResponse(status_code=500, content={"error": "GEMINI_API_KEY is not configured on the server."})
 
     try:
-        return await asyncio.to_thread(perform_research, topic, api_key)
+        return await asyncio.to_thread(perform_research, topic, api_key, request.context)
     except Exception as error:  # noqa: BLE001
         logger.exception("Research request failed")
         return JSONResponse(

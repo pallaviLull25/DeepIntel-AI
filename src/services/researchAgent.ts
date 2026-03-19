@@ -1,4 +1,4 @@
-import { ResearchApiResponse, ResearchReport, ResearchStep } from "../types";
+import { ResearchApiResponse, ResearchStep } from "../types";
 
 export class ResearchAgent {
   private onStepUpdate: (step: ResearchStep) => void;
@@ -7,7 +7,7 @@ export class ResearchAgent {
     this.onStepUpdate = onStepUpdate;
   }
 
-  async performResearch(topic: string): Promise<ResearchReport> {
+  async performResearch(topic: string): Promise<ResearchApiResponse> {
     const response = await fetch("/api/research", {
       method: "POST",
       headers: {
@@ -30,6 +30,6 @@ export class ResearchAgent {
       this.onStepUpdate({ ...step, status: "completed" });
     }
 
-    return payload.report;
+    return payload;
   }
 }
